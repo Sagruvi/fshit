@@ -28,13 +28,11 @@ func (c *con) GetUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
-	resp, err := json.Marshal(user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(user)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
 }
 func (c *con) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var user entity.User
@@ -67,7 +65,7 @@ func (c *con) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 func (c *con) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	id := r.Form.Get("id")
+	id := r.URL.Query().Get("Id") //need read query
 	err := c.Service.DeleteUser(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
